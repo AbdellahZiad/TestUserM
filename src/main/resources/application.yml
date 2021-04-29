@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    password: ziad2018
+    url: jdbc:postgresql://localhost:5432/sme
+    username: postgres
+  jpa:
+    hibernate:
+      dialect : org.hibernate.dialect.PostgreSQLDialect
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    show-sql: true
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+
+server:
+  port: 8989
