@@ -38,17 +38,6 @@ public class UserController {
         return ResponseEntity.ok(userService.saveUser(userAppDto));
     }
 
-    /**
-     * Filter list of users with pagination, default Pageable is 10 rows, sorted by id
-     */
-
-    @ApiOperation(value = "Filter with pagination: User")
-    @PostMapping("/filter")
-    ResponseEntity<?> filterUser(@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC, page = 0) Pageable pageable,
-                                 @Valid @RequestBody UserDTO filter) {
-
-        return ResponseEntity.ok(userService.filterUserApp(filter, pageable));
-    }
 
     /**
      * The 'active' parameter is a non-mandatory request parameter,
@@ -91,8 +80,8 @@ public class UserController {
     @ApiOperation("add Account")
     @PostMapping("/account")
     ResponseEntity<?> createAccountForAUser(
-         @RequestBody AccountDto accountDto) {
-        return ResponseEntity.ok(userService.createNewAccountForAUser(accountDto));
+         @RequestBody AccountDto accountDto, @Valid @Email @RequestParam String email) {
+        return ResponseEntity.ok(userService.createNewAccountForAUser(accountDto,email));
 
 
     }

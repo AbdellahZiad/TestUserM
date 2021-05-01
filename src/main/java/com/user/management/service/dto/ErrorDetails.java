@@ -1,4 +1,4 @@
-package com.user.management.exception;
+package com.user.management.service.dto;
 
 import lombok.Data;
 

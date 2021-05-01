@@ -1,25 +1,43 @@
+# Use MongoDB db ( document-oriented noSql database)
+server:
+  port: 8899
 spring:
-  datasource:
-    password: ziad2018
-    url: jdbc:postgresql://localhost:5432/sme
-    username: postgres
+  application:
+    name: UserServer
+  data:
+    mongodb:
+      database: userdb
+      host: localhost
+      port: 27017
   jpa:
     hibernate:
-      dialect : org.hibernate.dialect.PostgreSQLDialect
-      ddl-auto: update
-      naming:
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-    properties:
-      hibernate:
-        jdbc:
-          lob:
-            non_contextual_creation: true
-    show-sql: true
-  servlet:
-    multipart:
-      max-file-size: 100MB
-      max-request-size: 100MB
+      ddl-auto: create
 
 
-server:
-  port: 8989
+
+# Use PostgreSQL db
+#spring:
+#  datasource:
+#    password: ziad2018
+#    url: jdbc:postgresql://localhost:5432/sme
+#    username: postgres
+#  jpa:
+#    hibernate:
+#      dialect : org.hibernate.dialect.PostgreSQLDialect
+#      ddl-auto: update
+#      naming:
+#        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+#    properties:
+#      hibernate:
+#        jdbc:
+#          lob:
+#            non_contextual_creation: true
+#    show-sql: true
+#  servlet:
+#    multipart:
+#      max-file-size: 100MB
+#      max-request-size: 100MB
+#
+#
+#server:
+#  port: 8989

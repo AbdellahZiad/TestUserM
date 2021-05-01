@@ -14,6 +14,6 @@ public class AccountDto {
 
     private String description;
 
-    private UserDTO userAppDto;
+    private UserDTO user;
 
 }

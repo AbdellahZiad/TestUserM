@@ -4,20 +4,23 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "country")
+@Document
 public class Country {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String countryId;
 
-    @Column(unique = true)
+    @Indexed(unique = true)
     private String name;
 
     private String code;
@@ -27,7 +30,8 @@ public class Country {
         this.code = code;
     }
 
-    @OneToMany(mappedBy = "country")
+
+    @DBRef
     @JsonIgnore
-    private List<UserApp> userApps;
+    private List<UserApp> userApps = new ArrayList<>();
 }

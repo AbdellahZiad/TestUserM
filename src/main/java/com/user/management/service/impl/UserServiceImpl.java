@@ -13,8 +13,6 @@ import com.user.management.service.dto.UserDTO;
 import com.user.management.util.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,9 +20,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static com.user.management.repository.specification.SpecificationConfig.filterUser;
-import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+
 
 @Service
 @Slf4j
@@ -45,33 +42,20 @@ public class UserServiceImpl implements UserService {
         this.countryRepository = countryRepository;
     }
 
-    @Override
-    public Page<UserApp> filterUserApp(UserDTO filter, Pageable pageable) {
-        return doFilter(filter, pageable);
-    }
-
 
     /**
      * Create Or update new user
      */
 
     @Override
-    public UserDTO saveUser(UserDTO userAppDto) {
-
-        log.info("save new user " + userAppDto.getEmail());
-
-        if (userAppDto.getId() != null && userAppDto.getId() > 0)
-            return createOrUpdateNewUser(userAppDto);
-        else if (userRepository.findById(userAppDto.getId()).isPresent() && userRepository.existsByEmailIgnoreCaseAndActiveTrue(userAppDto.getEmail()))
-            throw new APIException("User with email @ " + userAppDto.getEmail() + " is already exist !!!");
-
+    public UserApp saveUser(UserDTO userAppDto) {
         return createOrUpdateNewUser(userAppDto);
 
     }
 
-    private UserDTO createOrUpdateNewUser(UserDTO userAppDto) {
+    private UserApp createOrUpdateNewUser(UserDTO userAppDto) {
         UserApp newUser = new UserApp();
-        newUser.setId(userAppDto.getId());
+        newUser.setUserID(userAppDto.getId());
         newUser.setFirstName(userAppDto.getFirstName());
         newUser.setLastName(userAppDto.getLastName());
         newUser.setEmail(userAppDto.getEmail());
@@ -91,7 +75,7 @@ public class UserServiceImpl implements UserService {
 
 
         newUser.setCountry(country);
-        return getUserDto(userRepository.save(newUser));
+        return userRepository.save(newUser);
     }
 
 
@@ -99,55 +83,41 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public String deleteUser(Long id) {
         log.info("delete user id =  " + id);
-
         UserApp userApp = userRepository.findById(id).orElse(null);
 
         if (userApp == null) return "Error whit delete this user";
 
-        userRepository.desactivateUserById(id);
+        userRepository.delete(userApp);
         return "User Deleted Successfully!!";
 
 
     }
 
 
-    private Page<UserApp> doFilter(UserDTO filter, Pageable pageable) {
-        return ofNullable(filter)
-                .map(f -> userRepository.findAll(filterUser(f), pageable))
-                .orElse(userRepository.findAll(pageable));
+    @Override
+    public List<UserApp> getAllUsers() {
+        return userRepository.findAll().stream().filter(UserApp::isActive).collect(toList());
     }
 
 
     @Override
-    public List<UserDTO> getAllUsers() {
-        return getAllUsersDto(userRepository.findAll().stream().filter(UserApp::isActive).collect(toList()));
-    }
-
-    private List<UserDTO> getAllUsersDto(List<UserApp> userApps) {
-        List<UserDTO> userDTOList = new ArrayList<>();
-        userApps.forEach(userApp -> userDTOList.add(getUserDto(userApp)));
-
-        return userDTOList;
-    }
-
-
-    @Override
-    public UserDTO getUserByEmail(String email, Boolean active) {
-        return active ? getUserDto(userRepository.findOneByEmailIgnoreCaseAndActiveTrue(email)) : getUserDto(userRepository.findOneByEmailIgnoreCase(email));
+    public UserApp getUserByEmail(String email, Boolean active) {
+        return active ? userRepository.findOneByEmailIgnoreCaseAndActiveTrue(email) :
+                userRepository.findOneByEmailIgnoreCase(email);
     }
 
     @Override
-    public AccountDto createNewAccountForAUser(AccountDto accountDto ) {
-        if (accountDto.getUserAppDto().getEmail()!=null && !userRepository.existsByEmailIgnoreCaseAndActiveTrue(accountDto.getUserAppDto().getEmail()))
-            throw new APIException("User with email @ " + accountDto.getUserAppDto().getEmail() + " is not exist !!!");
+    public AccountDto createNewAccountForAUser(AccountDto accountDto, String email) {
+        if (email != null && !userRepository.existsByEmailIgnoreCaseAndActiveTrue(email))
+            throw new APIException("User with email @ " + email + " is not exist !!!");
 
-        UserApp userApp = userRepository.findOneByEmailIgnoreCaseAndActiveTrue(accountDto.getUserAppDto().getEmail());
+        UserApp userApp = userRepository.findOneByEmailIgnoreCaseAndActiveTrue(email);
         if (isFranceCountry(userApp.getCountry()) && isAdults(userApp.getAge()))
             return createNewAccount(accountDto, userApp);
 
-        log.error("Error please check that user's country " + accountDto.getUserAppDto().getEmail() + " is not France or he is under 18 years old");
+        log.error("Error please check that user's country " + email + " is not France or he is under 18 years old");
 
-        throw new APIException("Error please check that user's country " + accountDto.getUserAppDto().getEmail() + " is not France or he is under 18 years old");
+        throw new APIException("Error please check that user's country " + email + " is not France or he is under 18 years old");
     }
 
     @Override
@@ -157,8 +127,8 @@ public class UserServiceImpl implements UserService {
             throw new APIException("User with email @ " + email + " is not exist !!!");
 
         UserApp userApp = userRepository.findOneByEmailIgnoreCaseAndActiveTrue(email);
-        List<Account> accounts = accountRepository.findByUserApp(userApp);
 
+        List<Account> accounts = accountRepository.findByUserApp(userApp);
 
         List<AccountDto> accountDtoList = new ArrayList<>();
         accounts.forEach(account -> accountDtoList.add(getAccountDto(account)));
@@ -177,21 +147,15 @@ public class UserServiceImpl implements UserService {
         account.setUserApp(userApp);
 
         account = accountRepository.save(account);
+        userApp.getAccounts().add(account);
+        userRepository.save(userApp);
+
         return getAccountDto(account);
-    }
-
-    public AccountDto getAccountDto(Account account) {
-
-        return AccountDto.builder()
-                .codeAccount(account.getCodeAccount())
-                .description(account.getDescription())
-                .userAppDto(getUserDto(account.getUserApp()))
-                .build();
     }
 
     private UserDTO getUserDto(UserApp userApp) {
         UserDTO newUser = new UserDTO();
-        newUser.setId(userApp.getId());
+        newUser.setId(userApp.getUserID());
         newUser.setFirstName(userApp.getFirstName());
         newUser.setLastName(userApp.getLastName());
         newUser.setEmail(userApp.getEmail());
@@ -201,6 +165,16 @@ public class UserServiceImpl implements UserService {
         newUser.setCreateDate(userApp.getCreateDate());
         newUser.setCountry(userApp.getCountry().getName());
         return newUser;
+    }
+
+
+    private AccountDto getAccountDto(Account account) {
+
+        return AccountDto.builder()
+                .codeAccount(account.getCodeAccount())
+                .description(account.getDescription())
+                .user(getUserDto(account.getUserApp()))
+                .build();
     }
 
     private boolean isAdults(Integer age) {

@@ -29,14 +29,14 @@ public class CountryServiceImpl implements CountryService {
     @Override
     public Country saveCountry(CountryDto countryDto) {
         log.info("save new country " + countryDto.getName());
-        if (countryDto.getId() == null || countryDto.getId() == 0) {
+        if (countryDto.getId() == null) {
             countryRepository.findByNameIgnoreCase(countryDto.getName()).ifPresent(existingCountry -> {
                         throw new APIException("Country " + existingCountry.getName() + " is Already Exist !!!");
                     }
             );
         }
         Country country = new Country();
-        country.setId(countryDto.getId());
+        country.setCountryId(countryDto.getId());
         country.setCode(countryDto.getName());
         country.setName(countryDto.getName().toUpperCase());
 

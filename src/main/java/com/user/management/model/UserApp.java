@@ -1,32 +1,38 @@
 package com.user.management.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 
 @Data
-@Entity(name = "user_app")
+@AllArgsConstructor
+@NoArgsConstructor
+@Document
 public class UserApp implements java.io.Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String userID;
 
-    @Column(nullable = false, unique = true)
+    @Indexed(unique = true)
     @Email(message = "Please provide a valid e-mail")
     @NotEmpty(message = "Please provide an e-mail")
     private String email;
 
-    @Column(name = "firstName", length = 50)
+
     private String firstName;
 
-    @Column(name = "lastName", length = 50)
     private String lastName;
 
     private Date createDate;
@@ -39,11 +45,10 @@ public class UserApp implements java.io.Serializable {
 
     private boolean active = true;
 
-    @ManyToOne(targetEntity = Country.class)
+    @DBRef
     private Country country;
 
-    @OneToMany(mappedBy = "userApp")
-    private List<Account> accounts;
-
+    @DBRef
+    private List<Account> accounts = new ArrayList<>();
 
 }

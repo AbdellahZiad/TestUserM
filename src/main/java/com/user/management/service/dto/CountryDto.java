@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
 @Data
 public class CountryDto {
 
-    private Long id;
+    private String id;
 
     @NotNull
     private String name;

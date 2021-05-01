@@ -35,7 +35,7 @@ public class LoggingAspect {
         long t2 = System.currentTimeMillis();
 
         System.out.println("Executed " + pjp.getSignature() + " in " + (t2 - t1) + "ms");
-        log.trace("Executed " + pjp.getSignature() + " in " + (t2 - t1) + "ms");
+
         log.info("Executed " + pjp.getSignature() + " in " + (t2 - t1) + "ms");
 
         return value;

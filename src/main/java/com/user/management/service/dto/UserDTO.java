@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.util.Date;
 
@@ -13,7 +14,7 @@ import java.util.Date;
 @Data
 public class UserDTO {
 
-    private Long id;
+    private String id;
 
     @Size(max = 50)
     private String firstName;
@@ -34,5 +35,6 @@ public class UserDTO {
 
     private Date createDate;
 
+    @Positive
     private Integer age;
 }

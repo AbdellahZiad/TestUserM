@@ -1,6 +1,7 @@
 package com.user.management.exception;
 
 
+import com.user.management.service.dto.ErrorDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
