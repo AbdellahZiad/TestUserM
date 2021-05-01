@@ -9,9 +9,7 @@ spring:
       database: userdb
       host: localhost
       port: 27017
-  jpa:
-    hibernate:
-      ddl-auto: create
+      auto-index-creation: false
 
 
 
